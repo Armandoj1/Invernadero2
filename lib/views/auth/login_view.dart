@@ -38,6 +38,9 @@ class _LoginViewState extends State<LoginView> {
           colorText: Colors.red.shade900,
           snackPosition: SnackPosition.BOTTOM,
         );
+      } else {
+        // Redirigir a home después del login exitoso
+        Get.offAllNamed('/home');
       }
     }
   }

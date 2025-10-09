@@ -49,6 +49,8 @@ class _RegisterViewState extends State<RegisterView> {
           colorText: Colors.green.shade900,
           snackPosition: SnackPosition.BOTTOM,
         );
+        // Redirigir a la página de inicio después del registro exitoso
+        Get.offAllNamed('/');
       }
     }
   }

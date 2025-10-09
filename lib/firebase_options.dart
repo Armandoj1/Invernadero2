@@ -41,12 +41,12 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_WEB_API_KEY',
-    appId: 'YOUR_WEB_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyD_AwzeH16STmKY8_pakhLrXxwd7jZKFmA',
+    appId: '1:850076927811:web:4e95e95361262e77da51f6',
+    messagingSenderId: '850076927811',
+    projectId: 'agrisense-pro-84fdd',
+    authDomain: 'agrisense-pro-84fdd.firebaseapp.com',
+    storageBucket: 'agrisense-pro-84fdd.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -76,11 +76,11 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'YOUR_WINDOWS_API_KEY',
-    appId: 'YOUR_WINDOWS_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
-    authDomain: 'YOUR_AUTH_DOMAIN',
-    storageBucket: 'YOUR_STORAGE_BUCKET',
+    apiKey: 'AIzaSyD_AwzeH16STmKY8_pakhLrXxwd7jZKFmA',
+    appId: '1:850076927811:web:4e95e95361262e77da51f6',
+    messagingSenderId: '850076927811',
+    projectId: 'agrisense-pro-84fdd',
+    authDomain: 'agrisense-pro-84fdd.firebaseapp.com',
+    storageBucket: 'agrisense-pro-84fdd.firebasestorage.app',
   );
 }

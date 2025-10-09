@@ -17,7 +17,10 @@ class HomeView extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => authController.signOut(),
+            onPressed: () async {
+              await authController.signOut();
+              Get.offAllNamed('/login');
+            },
             tooltip: 'Cerrar sesión',
           ),
         ],
