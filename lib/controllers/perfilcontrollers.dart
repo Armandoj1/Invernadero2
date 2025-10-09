@@ -1,8 +1,8 @@
 // controllers/profile_controller.dart
 
 import 'package:flutter/material.dart';
-import 'package:hibernadero/models/perfil.dart';
-import 'package:hibernadero/services/perfilservices.dart';
+import '../models/perfil.dart';
+import '../services/perfilservices.dart';
 
 
 class ProfileController extends ChangeNotifier {

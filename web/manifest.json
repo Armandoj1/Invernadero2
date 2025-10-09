@@ -1,6 +1,6 @@
 {
-    "name": "hibernadero",
-    "short_name": "hibernadero",
+    "name": "agrisense_pro",
+    "short_name": "agrisense_pro",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

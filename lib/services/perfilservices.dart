@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:hibernadero/models/perfil.dart';
+import '../models/perfil.dart';
 import 'package:http/http.dart' as http;
 
 class UserService {
