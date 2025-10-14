@@ -1,18 +1,18 @@
 // controllers/profile_controller.dart
 
 import 'package:flutter/material.dart';
-import '../models/perfil.dart';
-import '../services/perfilservices.dart';
+import 'package:agrisense_pro/models/perfil.dart';
+import 'package:agrisense_pro/services/perfilservices.dart';
 
 
 class ProfileController extends ChangeNotifier {
   final UserService _userService;
   
-  UserModel? _user;
+  ProfileModel? _user;
   bool _isLoading = false;
   String? _error;
   
-  UserModel? get user => _user;
+  ProfileModel? get user => _user;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
