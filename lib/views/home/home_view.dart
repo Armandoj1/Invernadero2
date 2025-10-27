@@ -17,24 +17,26 @@ class _HomeViewState extends State<HomeView> {
   final Random _random = Random();
   Timer? _timer;
 
-  // Datos simulados
+  // Datos simulados de sensores
   double _currentTemperature = 24.5;
+  double _currentHumidity = 65.0;
   String _systemStatus = 'Óptimo';
   String _lastReading = 'hace 2 min';
   String _aiMode = 'Automático';
   double _averageTemperature = 23.8;
-  double _yesterdayVariation = 0.7;
-  double _sensorAccuracy = 99.2;
-  double _aiEfficiency = 94.5;
+  double _averageHumidity = 63.5;
+  double _yesterdayTempVariation = 0.7;
+  double _yesterdayHumidVariation = -2.3;
 
-  // Datos para el gráfico (últimas 24 horas)
+  // Datos para los gráficos (últimas 24 horas)
   List<FlSpot> _temperatureData = [];
+  List<FlSpot> _humidityData = [];
 
   @override
   void initState() {
     super.initState();
     _generateHistoricalData();
-    _startTemperatureSimulation();
+    _startSensorSimulation();
   }
 
   @override
@@ -46,27 +48,33 @@ class _HomeViewState extends State<HomeView> {
   void _generateHistoricalData() {
     final now = DateTime.now();
     _temperatureData = List.generate(24, (index) {
-      final hour = now.subtract(Duration(hours: 23 - index));
-      // Temperatura simulada con variación natural
       final baseTemp = 24.0 + (_random.nextDouble() - 0.5) * 6;
-      return FlSpot(
-        index.toDouble(),
-        baseTemp,
-      );
+      return FlSpot(index.toDouble(), baseTemp);
+    });
+    
+    _humidityData = List.generate(24, (index) {
+      final baseHumid = 65.0 + (_random.nextDouble() - 0.5) * 15;
+      return FlSpot(index.toDouble(), baseHumid);
     });
   }
 
-  void _startTemperatureSimulation() {
+  void _startSensorSimulation() {
     _timer = Timer.periodic(const Duration(seconds: 3), (timer) {
       setState(() {
         // Simular cambios de temperatura realistas
-        final change = (_random.nextDouble() - 0.5) * 2.0;
-        _currentTemperature = (_currentTemperature + change).clamp(18.0, 32.0);
+        final tempChange = (_random.nextDouble() - 0.5) * 2.0;
+        _currentTemperature = (_currentTemperature + tempChange).clamp(18.0, 32.0);
+        
+        // Simular cambios de humedad realistas
+        final humidChange = (_random.nextDouble() - 0.5) * 3.0;
+        _currentHumidity = (_currentHumidity + humidChange).clamp(40.0, 85.0);
         
         // Actualizar estado del sistema
-        if (_currentTemperature >= 22 && _currentTemperature <= 26) {
+        if (_currentTemperature >= 22 && _currentTemperature <= 26 && 
+            _currentHumidity >= 55 && _currentHumidity <= 75) {
           _systemStatus = 'Óptimo';
-        } else if (_currentTemperature >= 20 && _currentTemperature <= 28) {
+        } else if ((_currentTemperature >= 20 && _currentTemperature <= 28 && 
+                   _currentHumidity >= 50 && _currentHumidity <= 80)) {
           _systemStatus = 'Alerta';
         } else {
           _systemStatus = 'Crítico';
@@ -75,23 +83,36 @@ class _HomeViewState extends State<HomeView> {
         // Actualizar última lectura
         _lastReading = 'hace ${_random.nextInt(3) + 1} min';
 
-        // Actualizar gráfico (mover datos hacia la izquierda)
+        // Actualizar gráficos (mover datos hacia la izquierda)
         _temperatureData.removeAt(0);
         _temperatureData.add(FlSpot(23, _currentTemperature));
+        
+        _humidityData.removeAt(0);
+        _humidityData.add(FlSpot(23, _currentHumidity));
 
-        // Actualizar otros datos simulados
+        // Actualizar datos promedios
         _averageTemperature = (_averageTemperature + (_random.nextDouble() - 0.5) * 0.2).clamp(20.0, 28.0);
-        _yesterdayVariation = (_random.nextDouble() - 0.5) * 1.5;
-        _sensorAccuracy = (98.5 + _random.nextDouble() * 1.5).clamp(98.0, 100.0);
-        _aiEfficiency = (92.0 + _random.nextDouble() * 8.0).clamp(90.0, 100.0);
+        _averageHumidity = (_averageHumidity + (_random.nextDouble() - 0.5) * 1.5).clamp(50.0, 80.0);
+        _yesterdayTempVariation = (_random.nextDouble() - 0.5) * 1.5;
+        _yesterdayHumidVariation = (_random.nextDouble() - 0.5) * 4.0;
       });
     });
   }
 
   Color _getTemperatureColor() {
     if (_currentTemperature >= 22 && _currentTemperature <= 26) {
-      return Colors.green;
+      return const Color(0xFF00BCD4); // Cyan para óptimo
     } else if (_currentTemperature >= 20 && _currentTemperature <= 28) {
+      return Colors.orange;
+    } else {
+      return Colors.red;
+    }
+  }
+
+  Color _getHumidityColor() {
+    if (_currentHumidity >= 55 && _currentHumidity <= 75) {
+      return const Color(0xFF00BCD4); // Cyan para óptimo
+    } else if (_currentHumidity >= 50 && _currentHumidity <= 80) {
       return Colors.orange;
     } else {
       return Colors.red;
@@ -101,7 +122,7 @@ class _HomeViewState extends State<HomeView> {
   Color _getStatusColor() {
     switch (_systemStatus) {
       case 'Óptimo':
-        return Colors.green;
+        return const Color(0xFF00BCD4); // Cyan
       case 'Alerta':
         return Colors.orange;
       case 'Crítico':
@@ -114,7 +135,7 @@ class _HomeViewState extends State<HomeView> {
   Color _getAiModeColor() {
     switch (_aiMode) {
       case 'Automático':
-        return Colors.green;
+        return const Color(0xFF00BCD4); // Cyan
       case 'Manual':
         return Colors.blue;
       case 'Híbrido':
@@ -150,7 +171,7 @@ class _HomeViewState extends State<HomeView> {
             fontSize: 20,
           ),
         ),
-        backgroundColor: const Color(0xFF2E7D32),
+        backgroundColor: const Color(0xFF00BCD4),
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
@@ -189,12 +210,12 @@ class _HomeViewState extends State<HomeView> {
             _buildHeader(),
             const SizedBox(height: 20),
             
-            // Panel principal de temperatura
-            _buildTemperaturePanel(),
+            // Panel de sensores principal (Temperatura y Humedad)
+            _buildSensorPanel(),
             const SizedBox(height: 20),
             
-            // Gráfica de tendencias
-            _buildTrendChart(),
+            // Gráficas de tendencias
+            _buildTrendCharts(),
             const SizedBox(height: 20),
             
             // Estado del sistema IA
@@ -214,14 +235,14 @@ class _HomeViewState extends State<HomeView> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2E7D32), Color(0xFF388E3C)],
+          colors: [Color(0xFF00BCD4), Color(0xFF26C6DA)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.green.withOpacity(0.3),
+            color: const Color(0xFF00BCD4).withOpacity(0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -230,7 +251,7 @@ class _HomeViewState extends State<HomeView> {
       child: Row(
         children: [
           const Icon(
-            Icons.thermostat,
+            Icons.eco,
             color: Colors.white,
             size: 32,
           ),
@@ -240,7 +261,7 @@ class _HomeViewState extends State<HomeView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Sistema de Control Inteligente',
+                  'Sistema de Monitoreo Inteligente',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
@@ -251,7 +272,7 @@ class _HomeViewState extends State<HomeView> {
                 Text(
                   'Última lectura: $_lastReading',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
+                    color: Colors.white.withOpacity(0.9),
                     fontSize: 14,
                   ),
                 ),
@@ -278,7 +299,7 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildTemperaturePanel() {
+  Widget _buildSensorPanel() {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -294,105 +315,62 @@ class _HomeViewState extends State<HomeView> {
       ),
       child: Column(
         children: [
+          // Encabezado
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF00BCD4).withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.sensors,
+                  color: Color(0xFF00BCD4),
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
               const Text(
-                'Temperatura Actual',
+                'Datos de Sensores',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getTemperatureColor().withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'Rango: 22-26°C',
-                  style: TextStyle(
-                    color: _getTemperatureColor(),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
+                  color: Color(0xFF424242),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
+          
+          // Grilla de sensores
           Row(
             children: [
+              // Sensor de Temperatura
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${_currentTemperature.toStringAsFixed(1)}°C',
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: _getTemperatureColor(),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    // Indicador visual tipo termómetro
-                    Container(
-                      width: 20,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Stack(
-                        children: [
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            height: ((_currentTemperature - 18) / 14) * 120,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: _getTemperatureColor(),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: _buildSensorCard(
+                  'Temperatura',
+                  '${_currentTemperature.toStringAsFixed(1)}°C',
+                  Icons.thermostat,
+                  _getTemperatureColor(),
+                  'Rango: 22-26°C',
+                  18.0,
+                  32.0,
+                  _currentTemperature,
                 ),
               ),
-              const SizedBox(width: 20),
+              const SizedBox(width: 16),
+              // Sensor de Humedad
               Expanded(
-                child: Column(
-                  children: [
-                    const Icon(
-                      Icons.auto_awesome,
-                      size: 40,
-                      color: Color(0xFF2E7D32),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'IA Activa',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: _getAiModeColor(),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Modo: $_aiMode',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
+                child: _buildSensorCard(
+                  'Humedad',
+                  '${_currentHumidity.toStringAsFixed(1)}%',
+                  Icons.water_drop,
+                  _getHumidityColor(),
+                  'Rango: 55-75%',
+                  40.0,
+                  85.0,
+                  _currentHumidity,
                 ),
               ),
             ],
@@ -402,7 +380,136 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  Widget _buildTrendChart() {
+  Widget _buildSensorCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+    String range,
+    double min,
+    double max,
+    double current,
+  ) {
+    final percentage = ((current - min) / (max - min)).clamp(0.0, 1.0);
+    
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withOpacity(0.1),
+            color.withOpacity(0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+          width: 2,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 32),
+          const SizedBox(height: 12),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              range,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Barra de progreso
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              height: 8,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+              ),
+              child: FractionallySizedBox(
+                alignment: Alignment.centerLeft,
+                widthFactor: percentage,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [color, color.withOpacity(0.7)],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrendCharts() {
+    return Column(
+      children: [
+        // Gráfica de Temperatura
+        _buildChart(
+          'Temperatura (24h)',
+          Icons.thermostat,
+          _temperatureData,
+          const Color(0xFF00BCD4),
+          18.0,
+          32.0,
+          '°C',
+        ),
+        const SizedBox(height: 20),
+        // Gráfica de Humedad
+        _buildChart(
+          'Humedad (24h)',
+          Icons.water_drop,
+          _humidityData,
+          const Color(0xFF2196F3),
+          40.0,
+          85.0,
+          '%',
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChart(
+    String title,
+    IconData icon,
+    List<FlSpot> data,
+    Color color,
+    double minY,
+    double maxY,
+    String unit,
+  ) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -419,20 +526,16 @@ class _HomeViewState extends State<HomeView> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(
-                Icons.show_chart,
-                color: Color(0xFF2E7D32),
-                size: 24,
-              ),
-              SizedBox(width: 8),
+              Icon(icon, color: color, size: 24),
+              const SizedBox(width: 8),
               Text(
-                'Tendencia de Temperatura (24h)',
+                title,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
+                  color: Colors.grey.shade800,
                 ),
               ),
             ],
@@ -445,8 +548,8 @@ class _HomeViewState extends State<HomeView> {
                 gridData: FlGridData(
                   show: true,
                   drawVerticalLine: true,
-                  horizontalInterval: 2,
-                  verticalInterval: 2,
+                  horizontalInterval: (maxY - minY) / 5,
+                  verticalInterval: 4,
                   getDrawingHorizontalLine: (value) {
                     return FlLine(
                       color: Colors.grey.shade300,
@@ -510,10 +613,10 @@ class _HomeViewState extends State<HomeView> {
                   leftTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      interval: 5,
+                      interval: (maxY - minY) / 4,
                       getTitlesWidget: (double value, TitleMeta meta) {
                         return Text(
-                          '${value.toInt()}°C',
+                          '${value.toInt()}$unit',
                           style: const TextStyle(
                             color: Colors.grey,
                             fontWeight: FontWeight.bold,
@@ -531,16 +634,16 @@ class _HomeViewState extends State<HomeView> {
                 ),
                 minX: 0,
                 maxX: 23,
-                minY: 18,
-                maxY: 32,
+                minY: minY,
+                maxY: maxY,
                 lineBarsData: [
                   LineChartBarData(
-                    spots: _temperatureData,
+                    spots: data,
                     isCurved: true,
                     gradient: LinearGradient(
                       colors: [
-                        Colors.red.shade400,
-                        Colors.orange.shade400,
+                        color,
+                        color.withOpacity(0.6),
                       ],
                     ),
                     barWidth: 3,
@@ -552,8 +655,8 @@ class _HomeViewState extends State<HomeView> {
                       show: true,
                       gradient: LinearGradient(
                         colors: [
-                          Colors.red.shade400.withOpacity(0.3),
-                          Colors.orange.shade400.withOpacity(0.1),
+                          color.withOpacity(0.3),
+                          color.withOpacity(0.05),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -590,7 +693,7 @@ class _HomeViewState extends State<HomeView> {
             children: [
               Icon(
                 Icons.psychology,
-                color: Color(0xFF2E7D32),
+                color: Color(0xFF00BCD4),
                 size: 24,
               ),
               SizedBox(width: 8),
@@ -599,7 +702,7 @@ class _HomeViewState extends State<HomeView> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2E7D32),
+                  color: Color(0xFF424242),
                 ),
               ),
             ],
@@ -686,28 +789,28 @@ class _HomeViewState extends State<HomeView> {
       childAspectRatio: 1.5,
       children: [
         _buildInfoCard(
-          'Temperatura Promedio',
+          'Temp Promedio',
           '${_averageTemperature.toStringAsFixed(1)}°C',
           Icons.thermostat_outlined,
-          Colors.blue,
+          const Color(0xFF00BCD4),
         ),
         _buildInfoCard(
-          'Variación vs Ayer',
-          '${_yesterdayVariation > 0 ? '+' : ''}${_yesterdayVariation.toStringAsFixed(1)}°C',
+          'Var Temp vs Ayer',
+          '${_yesterdayTempVariation > 0 ? '+' : ''}${_yesterdayTempVariation.toStringAsFixed(1)}°C',
           Icons.trending_up,
-          _yesterdayVariation > 0 ? Colors.red : Colors.green,
+          _yesterdayTempVariation > 0 ? Colors.red : const Color(0xFF00BCD4),
         ),
         _buildInfoCard(
-          'Precisión Sensor',
-          '${_sensorAccuracy.toStringAsFixed(1)}%',
-          Icons.precision_manufacturing,
-          Colors.purple,
+          'Humedad Promedio',
+          '${_averageHumidity.toStringAsFixed(1)}%',
+          Icons.water_drop,
+          const Color(0xFF2196F3),
         ),
         _buildInfoCard(
-          'Eficiencia IA',
-          '${_aiEfficiency.toStringAsFixed(1)}%',
-          Icons.auto_awesome,
-          Colors.orange,
+          'Var Humedad vs Ayer',
+          '${_yesterdayHumidVariation > 0 ? '+' : ''}${_yesterdayHumidVariation.toStringAsFixed(1)}%',
+          Icons.trending_up,
+          _yesterdayHumidVariation > 0 ? Colors.red : const Color(0xFF00BCD4),
         ),
       ],
     );
